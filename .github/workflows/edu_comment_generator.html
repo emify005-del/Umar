@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Generator - Multi-Qualification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .qualification-list {
+            list-style: none;
+        }
+        
+        .qualification-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-size: 13px;
+        }
+        
+        .qualification-item:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(5px);
+        }
+        
+        .qualification-item.active {
+            background: rgba(255,255,255,0.95);
+            color: #667eea;
+            font-weight: 600;
+            border-left: 3px solid #fff;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .active-qual {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-num {
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .task-display {
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .task-display.empty {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-generate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-copy {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-copy:hover {
+            background: #45a049;
+        }
+        
+        .btn-clear {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background: #da190b;
+        }
+        
+        .output-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .output-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .output-box {
+            background: white;
+            padding: 16px;
+            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+            min-height: 120px;
+            line-height: 1.6;
+            color: #333;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .output-box.empty {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .copy-feedback {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .copy-feedback.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-title">📚 Qualifications</div>
+            <ul class="qualification-list">
+                <li class="qualification-item active" onclick="selectQualification('c4es', this)">Certificate 4 Education Support</li>
+                <li class="qualification-item" onclick="selectQualification('c3ecec', this)">Certificate 3 ECEC</li>
+                <li class="qualification-item" onclick="selectQualification('decec', this)">Diploma of ECEC</li>
+                <li class="qualification-item" onclick="selectQualification('cs', this)">Diploma of Community Services</li>
+                <li class="qualification-item" onclick="selectQualification('as', this)">Aging Support</li>
+                <li class="qualification-item" onclick="selectQualification('cis', this)">Certificate in Individual Support</li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container">
+                <div class="header">
+                    <h1>📝 Comment Generator</h1>
+                    <p>Education Support - Assessment Task Comments</p>
+                    <div class="active-qual" id="activeQual">Certificate 4 Education Support</div>
+                </div>
+                
+                <div class="content">
+                    <!-- Section 1: Name Input -->
+                    <div class="section">
+                        <div class="section-title">
+                            <div class="section-num">1</div>
+                            Student/User Name
+                        </div>
+                        <input type="text" id="nameInput" placeholder="Enter name here..." />
+                    </div>
+                    
+                    <!-- Section 2: Task Code Selection -->
+                    <div class="section">
+                        <div class="section-title">
+                            <div class="section-num">2</div>
+                            Assessment Task Code
+                        </div>
+                        <select id="taskCodeSelect" onchange="updateTaskName()">
+                            <option value="">-- Select a Task Code --</option>
+                            <optgroup id="taskGroup" label="Tasks">
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <!-- Section 3: Task Name Display -->
+                    <div class="section">
+                        <div class="section-title">
+                            <div class="section-num">3</div>
+                            Task Name
+                        </div>
+                        <div class="task-display empty" id="taskNameDisplay">Select a task code to see details</div>
+                    </div>
+                    
+                    <!-- Section 4: Generated Comment Output -->
+                    <div class="output-section">
+                        <div class="output-label">📤 Generated Comment:</div>
+                        <div class="output-box empty" id="outputBox">Your generated comment will appear here...</div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="button-group">
+                        <button class="btn-generate" onclick="generateComment()">Generate Comment</button>
+                        <button class="btn-copy" onclick="copyToClipboard()">Copy to Clipboard</button>
+                        <button class="btn-clear" onclick="clearAll()">Clear All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="copy-feedback" id="copyFeedback">✓ Copied to clipboard!</div>
+    
+    <script>
+        let currentQualification = 'c4es';
+        
+        const qualifications = {
+            'c4es': 'Certificate 4 Education Support',
+            'c3ecec': 'Certificate 3 ECEC',
+            'decec': 'Diploma of ECEC',
+            'cs': 'Diploma of Community Services',
+            'as': 'Aging Support',
+            'cis': 'Certificate in Individual Support'
+        };
+        
+        const taskCodes = {
+            'c4es': [
+                { code: 'CHCDIV001-AT1', name: 'Sense of Work with diverse people' },
+                { code: 'CHCDIV001-AT2', name: 'Cultural Diversity in Australia' },
+                { code: 'CHCDIV001-AT3', name: 'Role in Communicating with Culturally Diverse People' },
+                { code: 'CHCDIV001-AT4', name: 'Reflect on Own and Other Cultures' },
+                { code: 'CHCEDS033-AT1', name: 'Meet legal and ethical obligations in an education support environment' },
+                { code: 'CHCEDS033-AT2', name: 'Identify and Comply with Legal and Ethical Obligations' },
+                { code: 'CHCEDS033-AT3A', name: 'HEALTH SAFETY AND WELLBEING' },
+                { code: 'CHCEDS033-AT3B', name: 'HEALTH SAFETY AND WELLBEING COMPLETE REQUIRED DOCUMENTATION' },
+                { code: 'CHCEDS033-AT3C', name: 'RESPONDING TO EMERGENCY SITUATIONS' },
+                { code: 'CHCEDS059-AT1', name: 'Contribute to the health, safety and wellbeing of students' },
+                { code: 'CHCEDS059-AT2', name: 'Complete an Emergency Evacuation and Hazard Report' },
+                { code: 'CHCEDS059-AT3', name: 'Educate Students About Health, Safety and Wellbeing' },
+                { code: 'CHCEDS059-AT4', name: 'Health, Safety and Wellbeing Outside the Classroom' },
+                { code: 'CHCEDS045-AT1', name: 'Develop and Implement Strategies to Support Maths' },
+                { code: 'CHCEDS045-AT2A', name: 'ASSESS STUDENT KNOWLEDGE AND SKILL AND BUILD REPORT' },
+                { code: 'CHCEDS045-AT2B', name: 'CONTRIBUTE TO PLANNING IN CONSULTATION WITH THE TEACHER' },
+                { code: 'CHCEDS045-AT2C', name: 'IMPLEMENT STRATEGIES AND REPORT BACK TO THE TEACHER' },
+                { code: 'CHCEDS046-AT1', name: 'Literacy and Learning' },
+                { code: 'CHCEDS046-AT2', name: 'Learning Approaches and Practices' },
+                { code: 'CHCEDS046-AT3', name: 'Facilitate Literacy Learning' },
+                { code: 'CHCEDS046-AT4', name: 'Work Performance Reflections' },
+                { code: 'CHCEDS046-AT5', name: 'Supervisor Report' },
+                { code: 'CHCEDS042-AT1', name: 'Provide Support For E-Learning' },
+                { code: 'CHCEDS042-AT2', name: 'E-learning Case Studies' },
+                { code: 'CHCEDS042-AT3', name: 'E-learning System Research' },
+                { code: 'CHCEDS042-AT4', name: 'Reflections on E-learning Experiences' },
+                { code: 'CHCEDS042-AT5', name: 'Supervisor Report' },
+                { code: 'CHCEDS049-AT1', name: 'Supervise Students Outside the Classroom' },
+                { code: 'CHCEDS049-AT2', name: 'Plan, Implement and Reflect on Supervision Strategies' },
+                { code: 'CHCEDS049-AT2A', name: 'Complete a Risk Assessment and Management Plan For Outside The Classroom' },
+                { code: 'CHCEDS049-AT2B', name: 'Assessor\'s Observations' },
+                { code: 'CHCEDS049-AT2C', name: 'Reflection Strategies Used for Supervision and Interaction With Children' },
+                { code: 'CHCEDS049-AT2D', name: 'Complete Incident Debrief and Incident Report Documents' },
+                { code: 'CHCEDS049-AT3', name: 'Supervisor Report' },
+                { code: 'CHCEDS053-AT1', name: 'Assist in Production of Language Resources' },
+                { code: 'CHCEDS053-AT2', name: 'Produce Language Resources' },
+                { code: 'CHCEDS053-AT3', name: 'Supervisor Report' },
+                { code: 'CHCEDS048-AT1', name: 'Supporting Additional Needs' },
+                { code: 'CHCEDS048-AT2', name: 'Autism Spectrum Disorder (ASD)' },
+                { code: 'CHCEDS048-AT3', name: 'Provide Additional Learning Support' },
+                { code: 'CHCEDS048-AT4', name: 'Reflect on Supporting Additional Needs Students' },
+                { code: 'CHCEDS058-AT1', name: 'Supporting Disability and Behaviours' },
+                { code: 'CHCEDS058-AT2', name: 'Design Behaviour and Inclusion Plans' },
+                { code: 'CHCEDS058-AT3', name: 'Implement Behaviour and Inclusion Plans' },
+                { code: 'CHCEDS058-AT4', name: 'Behaviour and Inclusion Plans Review' },
+                { code: 'CHCEDS058-AT5', name: 'Supervisor Report' },
+                { code: 'CHCPRP003-AT1', name: 'Reflect on and Improve own Professional Practice' },
+                { code: 'CHCPRP003-AT2', name: 'Practice Improvement Research Report - Sector Developments' },
+                { code: 'CHCPRP003-AT3', name: 'Feedback to Improve Practice' },
+                { code: 'CHCPRP003-AT4', name: 'Personal Development Plan' },
+                { code: 'CHCPRT001-AT1', name: 'Identify and Respond to Children and Young People at Risk' },
+                { code: 'CHCPRT001-AT2', name: 'Justin and Heidi' },
+                { code: 'CHCPRT001-AT3A', name: 'Disclosure of Abuse From Justin (Role play)' },
+                { code: 'CHCPRT001-AT3B', name: 'Report to Supervisor and Coordinator' },
+                { code: 'CHCPRT001-AT3C', name: 'Report Suspicions of Child Abuse' },
+                { code: 'CHCPRT001-AT4', name: 'Portfolio of Procedures and Experiences' },
+                { code: 'CHCECE054-AT1', name: 'Written Questions' },
+                { code: 'CHCECE054-AT2', name: 'Reflection' },
+                { code: 'CHCECE054-AT3A1', name: 'Support an Aboriginal and/or Torres Strait Islander RESEARCH' },
+                { code: 'CHCECE054-AT3A2', name: 'Support an Aboriginal and/or Torres Strait Islander COLLABORATE' },
+                { code: 'CHCECE054-AT3B', name: 'EXAMINE DIFFERENT LEARNING OPPORTUNITIES' },
+                { code: 'CHCECE054-AT3C', name: 'COMMUNICATE LEARNING OPPORTUNITIES TO OTHERS' },
+                { code: 'CHCECE054-AT3D', name: 'PLANNING FOR SUPPORT OF THE GROUP EXPERIENCE' },
+                { code: 'CHCECE054-AT3E', name: 'Support an Aboriginal and/or Torres Strait Islander Cultures research and group discussion role play' },
+                { code: 'CHCECE054-AT4', name: 'Supervisor Report' }
+            ],
+            'decec': [
+                { code: 'BSBTWK502-AT1', name: 'Manage Team Effectiveness' },
+                { code: 'BSBTWK502-AT2A', name: 'Organise a Team Meeting' },
+                { code: 'BSBTWK502-AT2B', name: 'Role Play: Team Meeting' },
+                { code: 'BSBTWK502-AT2C', name: 'Team Performance Review, Rewards and Recognition' },
+                { code: 'BSBTWK502-AT3A', name: 'Performance Management (Observation)' },
+                { code: 'BSBTWK502-AT3B', name: 'Policies and Procedures (Observation/Task)' },
+                { code: 'CHCDIV003-AT1', name: 'Manage and Promote Diversity' },
+                { code: 'CHCDIV003-AT2', name: 'Improving Workplace Diversity Practices (Role Play)' },
+                { code: 'CHCDIV003-AT3', name: 'Work Placement Tasks' },
+                { code: 'CHCECE041-AT1', name: 'Maintain a Safe and Healthy Environment for Children' },
+                { code: 'CHCECE041-AT2', name: 'Compile Workplace Health and Safety Folder (Project)' },
+                { code: 'CHCECE041-AT3', name: 'Design, Risk Assess and Participate in an Excursion (Project)' },
+                { code: 'CHCECE041-AT4', name: 'Undertake Role of Workplace Health and Safety Officer (Case Study)' },
+                { code: 'CHCECE050-AT1', name: 'Work in Partnership with Children\'s Families' },
+                { code: 'CHCECE050-AT2', name: 'Providing Information to Families' },
+                { code: 'CHCECE050-AT3A', name: 'Calling the Parents (Role Play)' },
+                { code: 'CHCECE050-AT3B', name: 'Meeting the Parents (Role Play)' },
+                { code: 'CHCECE050-AT4', name: 'Enrol and Support New Family (Role Play)' },
+                { code: 'CHCECE050-AT5', name: 'Supporting Community Connections' },
+                { code: 'CHCPOL002-AT1', name: 'Develop and Implement Policy' },
+                { code: 'CHCPOL002-AT2A', name: 'Evaluate and Review Workplace Policies' },
+                { code: 'CHCPOL002-AT2B', name: 'Develop and Implement Workplace Policies' },
+                { code: 'CHCECE045-AT1', name: 'Behaviour and Inclusion' },
+                { code: 'CHCECE045-AT2', name: 'Develop Guidelines to Promote Respectful Interactions and Inclusion' },
+                { code: 'CHCECE045-AT3', name: 'Observe and Oversee Interactions and Behaviour in Children' },
+                { code: 'CHCECE045-AT4', name: 'Identify Challenging Behaviours' },
+                { code: 'CHCECE045-AT5', name: 'Develop, Implement and Evaluate Support Plans' },
+                { code: 'CHCECE042-AT1', name: 'Written Questions - Foster holistic early childhood learning, development and wellbeing' },
+                { code: 'CHCECE042-AT2', name: 'Developmental Assessment and Written Reflection' },
+                { code: 'CHCECE042-AT3A', name: 'Planning Holistically for Children\'s Development' },
+                { code: 'CHCECE042-AT3C', name: 'Implement Planned Learning Experience' },
+                { code: 'CHCECE044-AT1', name: 'Compliance in Early Childhood' },
+                { code: 'CHCECE044-AT2', name: 'Preparing the Service and Resolving Concerns' },
+                { code: 'CHCECE044-AT3RP1', name: 'Responding to Systematic Problems to Improve Practice' },
+                { code: 'CHCECE044-AT3RP2', name: 'Respond to a Complaint Effectively' },
+                { code: 'CHCECE044-AT4', name: 'Plan for Environmental Responsibilities' },
+                { code: 'CHCECE044-AT5', name: 'Facilitate Compliance in an Education and Care Setting' },
+                { code: 'CHCECE043-AT1', name: 'Planning and Curriculum' },
+                { code: 'CHCECE043-AT2', name: 'Develop a Focus Children Folder' },
+                { code: 'CHCECE043-AT3A', name: 'Plan and Implement Curriculum to Nurture Creativity in Children' },
+                { code: 'CHCECE043-AT3F', name: 'Workplace Observation' },
+                { code: 'CHCECE043-AT4', name: 'Reflective Journal' },
+                { code: 'CHCECE043-AT5', name: 'Supervisor Report' },
+                { code: 'CHCPRP003-AT1', name: 'Reflect on and improve own professional practice' },
+                { code: 'CHCPRP003-AT2', name: 'Practice Improvement Research Report – Sector Developments' },
+                { code: 'CHCPRP003-AT3', name: 'Feedback to Improve Practice' },
+                { code: 'CHCPRP003-AT4', name: 'Personal Development Plan' }
+            ],
+            'cis': [
+                { code: 'CHCDIS012-AT1', name: 'Support community participation and social inclusion' },
+                { code: 'CHCDIS012-AT2', name: 'Support to Access Community or Social Opportunities' },
+                { code: 'CHCDIS012-AT2A', name: 'Client Requiring Support (Role Play)' },
+                { code: 'CHCDIS012-AT2B', name: 'Develop a Community Support Plan & Contact Community Provider' },
+                { code: 'CHCDIS012-AT3', name: 'Support to Access Community or Volunteer Work Opportunities' },
+                { code: 'CHCDIS012-AT3A', name: 'Client Requiring Work Support (Role Play)' },
+                { code: 'CHCDIS012-AT3B', name: 'Develop a Workplace Participation Plan & Contact Workplace Provider' },
+                { code: 'CHCDIS012-AT4', name: 'Monitor and Review' },
+                { code: 'CHCDIS012-AT4A', name: 'Follow-Up With Naomi (Role Play)' },
+                { code: 'CHCDIS012-AT4B', name: 'Follow-Up With Donny (Role Play)' },
+                { code: 'CHCDIS012-AT4C', name: 'Contact Providers' },
+                { code: 'CHCDIS011-AT1', name: 'Knowledge Questions' },
+                { code: 'CHCDIS011-AT2', name: 'Case Studies' },
+                { code: 'CHCDIS011-AT3A', name: 'Review the Individual Action Plan for Your Client' },
+                { code: 'CHCDIS011-AT3B', name: 'Support Skills Development (Role Play)' },
+                { code: 'CHCDIS011-AT3C', name: 'Complete and Distribute Documentation' },
+                { code: 'CHCDIS011-AT3D', name: 'Implement Skills Development (Role Play)' },
+                { code: 'CHCDIS011-AT3E', name: 'Maintain Client Documentation' },
+                { code: 'CHCDIS011-AT4A', name: 'Contributing to Skills Development – Trudy' },
+                { code: 'CHCDIS011-AT4B', name: 'Plan Skills Development (Role Play)' },
+                { code: 'CHCDIS011-AT4C', name: 'Complete and Distribute Documentation' },
+                { code: 'CHCDIS011-AT4D', name: 'Implement Skills Development (Role Play)' },
+                { code: 'CHCDIS011-AT4E', name: 'Maintain Client Documentation' },
+                { code: 'CHCDIS011-AT5A', name: 'Skills Assessment to work with disabilities' },
+                { code: 'CHCDIS011-AT5B', name: 'Skills Development (Observation)' },
+                { code: 'CHCDIV001-AT1', name: 'Work with Diverse People' },
+                { code: 'CHCDIV001-AT2', name: 'Cultural Diversity in Australia' },
+                { code: 'CHCDIV001-AT3', name: 'Communicate with Culturally Diverse People (Role Play)' },
+                { code: 'CHCDIV001-AT4', name: 'Reflect on Own Cultural Competency in the Workplace' },
+                { code: 'CHCLEG001-AT1', name: 'Work legally and ethically' },
+                { code: 'CHCLEG001-AT2', name: 'Case Studies for Work legally and ethically' },
+                { code: 'CHCLEG001-AT3', name: 'Contribute to Workplace Improvements' },
+                { code: 'CHCLEG001-AT3A', name: 'Identify Workplace Improvements' },
+                { code: 'CHCLEG001-AT3B', name: 'Discuss Workplace Improvements (Role Play)' },
+                { code: 'CHCLEG001-AT4', name: 'Legal and Ethical Responsibilities at Banksia Care' },
+                { code: 'CHCLEG001-AT4A', name: 'legal and ethical rights For Hannah Pearce' },
+                { code: 'CHCLEG001-AT4B', name: 'legal and ethical rights For Harry Jenkins' },
+                { code: 'CHCCOM005-AT1', name: 'Communicate and work in health or community services' },
+                { code: 'CHCCOM005-AT2', name: 'Case Studies' },
+                { code: 'CHCCOM005-AT3A', name: 'Communicate with a Client' },
+                { code: 'CHCCOM005-AT3B', name: 'Email Coordinator' },
+                { code: 'CHCCOM005-AT4A', name: 'Communicate with Co-worker' },
+                { code: 'CHCCOM005-AT4B', name: 'Email Coordinator' },
+                { code: 'CHCCOM005-AT5A', name: 'Meeting with Coordinator' },
+                { code: 'CHCCOM005-AT5B', name: 'Complete Documentation' },
+                { code: 'HLTINF006-AT1', name: 'Work Safely in Client Care' },
+                { code: 'HLTINF006-AT2', name: 'Case Studies' },
+                { code: 'HLTINF006-AT3', name: 'Mark – Cleaning up Blood or Body Fluids' },
+                { code: 'HLTINF006-AT4', name: 'Assisting a Client in a Wheelchair Exit a Building' },
+                { code: 'HLTINF006-AT5', name: 'Eldred – Cleaning up Blood or Body Fluids' },
+                { code: 'HLTINF006-AT6', name: 'Participating in a WHS Meeting' },
+                { code: 'HLTINF006-AT7', name: 'Brianna – Client Contracts Infectious Disease' },
+                { code: 'CHCCCS041-AT1', name: 'Recognise healthy body systems' },
+                { code: 'CHCCCS041-AT2', name: 'Assist a Client with their Health Concerns' },
+                { code: 'CHCCCS041-AT3', name: 'Assist a Client to Attend Weekly Sport' },
+                { code: 'CHCCCS041-AT4', name: 'Assist a Client During Scheduled Health Check' },
+                { code: 'CHCAGE013-AT1', name: 'Work effectively in aged care' },
+                { code: 'CHCAGE013-AT2', name: 'Day in the Life of a Personal Care Worker' },
+                { code: 'CHCAGE013-AT2A', name: 'Day in the Life of a Personal Care Worker; Position Description' },
+                { code: 'CHCAGE013-AT2B', name: 'Day in the Life of a Personal Care Worker; Providing Care' },
+                { code: 'CHCAGE013-AT2C', name: 'Completing Reports' },
+                { code: 'CHCMHS001-AT1', name: 'Work with people with mental health issues' },
+                { code: 'CHCMHS001-AT2', name: 'Research Report' },
+                { code: 'CHCMHS001-AT3', name: 'Working with a Client with Depression' },
+                { code: 'CHCMHS001-AT4', name: 'Working with a Client with Post-Concussion Syndrome' },
+                { code: 'CHCMHS001-AT5', name: 'Working with a Client with Post-Traumatic Stress Disorder' },
+                { code: 'CHCAGE011-AT1', name: 'Provide support to people living with dementia' },
+                { code: 'CHCAGE011-AT2', name: 'Assist Edna' },
+                { code: 'CHCAGE011-AT3', name: 'Recognise Signs of Abuse' },
+                { code: 'CHCAGE011-AT4', name: 'Support Clients with Dementia' },
+                { code: 'CHCAGE011-AT5', name: 'Client Work Reports' },
+                { code: 'CHCCCS031-AT1', name: 'Provide individualised support' },
+                { code: 'CHCCCS031-AT2', name: 'Case Studies' },
+                { code: 'CHCCCS031-AT3A', name: 'First Client Simulation – Suzanne' },
+                { code: 'CHCCCS031-AT3B', name: 'Second Client Simulation – Samuel' },
+                { code: 'CHCCCS031-AT3C', name: 'Third Client Simulation – Chandra' },
+                { code: 'CHCCCS031-AT4A', name: 'Workplace Observation | 1st Visit' },
+                { code: 'CHCCCS031-AT4B', name: 'Workplace Observation | 2nd Visit' },
+                { code: 'CHCCCS031-AT4C', name: 'Workplace Observation | 3rd Visit' },
+                { code: 'CHCCCS038-AT1', name: 'Wellbeing, Independence and Empowerment' },
+                { code: 'CHCCCS038-AT2', name: 'Case Study' },
+                { code: 'CHCCCS038-AT3', name: 'Individual Differences' },
+                { code: 'CHCCCS038-AT4A', name: 'Client Interview' },
+                { code: 'CHCCCS038-AT4B', name: 'Support Plan and Report' },
+                { code: 'CHCCCS038-AT5A', name: 'Supporting Clients' },
+                { code: 'CHCCCS038-AT5B', name: 'Reporting Client Incident Situations' },
+                { code: 'CHCCCS038-AT5C', name: 'Reporting Client Situations of Abuse' },
+                { code: 'CHCCCS038-AT6', name: 'Supervisor Report' }
+            ],
+            'c3ecec': [],
+            'cs': [],
+            'as': []
+        };
+        
+        const commentVariations = {
+            default: [
+                '{name}, your work on {task} demonstrates strong engagement with the assessment requirements. Your effort and attention to detail are commendable.',
+                '{name}, excellent performance on {task}. Your submission reflects clear understanding and thorough preparation.',
+                '{name}, your completion of {task} shows commitment to learning. Your work quality is evident and well-structured.'
+            ]
+        };
+        
+        function loadTaskCodes() {
+            const select = document.getElementById('taskCodeSelect');
+            const optgroup = document.getElementById('taskGroup');
+            optgroup.innerHTML = '';
+            
+            const tasks = taskCodes[currentQualification] || [];
+            tasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task.code;
+                option.textContent = `${task.code} - ${task.name}`;
+                optgroup.appendChild(option);
+            });
+        }
+        
+        function selectQualification(qualId, element) {
+            currentQualification = qualId;
+            
+            // Update active item
+            document.querySelectorAll('.qualification-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Update header
+            document.getElementById('activeQual').textContent = qualifications[qualId];
+            
+            // Load task codes
+            loadTaskCodes();
+            
+            // Clear form
+            clearAll();
+        }
+        
+        function updateTaskName() {
+            const taskCode = document.getElementById('taskCodeSelect').value;
+            const taskDisplay = document.getElementById('taskNameDisplay');
+            
+            if (taskCode) {
+                const tasks = taskCodes[currentQualification] || [];
+                const task = tasks.find(t => t.code === taskCode);
+                if (task) {
+                    taskDisplay.textContent = task.name;
+                    taskDisplay.classList.remove('empty');
+                }
+            } else {
+                taskDisplay.textContent = 'Select a task code to see details';
+                taskDisplay.classList.add('empty');
+            }
+        }
+        
+        function generateComment() {
+            const name = document.getElementById('nameInput').value.trim();
+            const taskCode = document.getElementById('taskCodeSelect').value;
+            const outputBox = document.getElementById('outputBox');
+            
+            if (!name) {
+                outputBox.textContent = '⚠️ Please enter a name';
+                outputBox.classList.add('empty');
+                return;
+            }
+            
+            if (!taskCode) {
+                outputBox.textContent = '⚠️ Please select a task code';
+                outputBox.classList.add('empty');
+                return;
+            }
+            
+            const tasks = taskCodes[currentQualification] || [];
+            const task = tasks.find(t => t.code === taskCode);
+            
+            if (!task) {
+                outputBox.textContent = '⚠️ Task not found';
+                outputBox.classList.add('empty');
+                return;
+            }
+            
+            const comments = commentVariations.default;
+            const randomIndex = Math.floor(Math.random() * comments.length);
+            const selectedComment = comments[randomIndex];
+            
+            const finalComment = selectedComment
+                .replace('{name}', name)
+                .replace('{task}', task.name);
+            
+            outputBox.textContent = finalComment;
+            outputBox.classList.remove('empty');
+        }
+        
+        function copyToClipboard() {
+            const outputBox = document.getElementById('outputBox');
+            const text = outputBox.textContent;
+            
+            if (text.includes('⚠️') || text.includes('appear here')) {
+                alert('Generate a comment first!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const feedback = document.getElementById('copyFeedback');
+                feedback.classList.add('show');
+                setTimeout(() => feedback.classList.remove('show'), 2000);
+            });
+        }
+        
+        function clearAll() {
+            document.getElementById('nameInput').value = '';
+            document.getElementById('taskCodeSelect').value = '';
+            document.getElementById('taskNameDisplay').textContent = 'Select a task code to see details';
+            document.getElementById('taskNameDisplay').classList.add('empty');
+            document.getElementById('outputBox').textContent = 'Your generated comment will appear here...';
+            document.getElementById('outputBox').classList.add('empty');
+        }
+        
+        // Initialize
+        loadTaskCodes();
+    </script>
+</body>
+</html>
